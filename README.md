@@ -53,85 +53,76 @@ Evaluate the model with the testing data.
 ### Register Number:212221230105
 ```python
 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
 from google.colab import auth
 import gspread
 from google.auth import default
 
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
-import matplotlib.pyplot as plt
-
-from tensorflow.keras.models import Sequential as Seq
-from tensorflow.keras.layers import Dense as Den
-from tensorflow.keras.metrics import RootMeanSquaredError as rmse
-
 auth.authenticate_user()
-creds, _ = default()
-gc = gspread.authorize(creds)
+creds,_=default()
+gc=gspread.authorize(creds)
+worksheet=gc.open('newdata').sheet1
+data=worksheet.get_all_values()
+dataset1=pd.DataFrame(data[1:],columns=data[0])
+dataset1=dataset1.astype(int)
 
-sheet = gc.open('SD2').sheet1
-rows = sheet.get_all_values()
+x = df[['Input ']].values
+y = df[['Output']].values
 
-df = pd.DataFrame(rows[1:], columns=rows[0])
-df = df.astype({'X':'int'})
-df = df.astype({'Y':'int'})
-
-x = df[["X"]] .values
-y = df[["Y"]].values
-
-scaler = MinMaxScaler()
-scaler.fit(x)
-x_n = scaler.fit_transform(x)
-
-x_train,x_test,y_train,y_test = train_test_split(x_n,y,test_size = 0.3,random_state = 3)
-
-ai = Seq([
-    Den(8,activation = 'relu',input_shape=[1]),
-    Den(15,activation = 'relu'),
-    Den(1),
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.33,random_state=33)
+Scaler=MinMaxScaler()
+Scaler.fit(x_train)
+x_train=Scaler.transform(x_train)
+ai_brain=Sequential([
+    Dense(8,activation='relu'),
+    Dense(10,activation='relu'),
+    Dense(1)
 ])
+ai_brain.compile(optimizer='rmsprop',loss='mse')
+ai_brain.fit(x_train,y_train,epochs=100)
 
-ai.compile(optimizer = 'rmsprop',loss = 'mse')
+loss_df=pd.DataFrame(ai_brain.history.history)
+loss_df.plot()
+X_test1 = Scaler.transform(x_test)  
+ai_brain.evaluate(X_test1, y_test)
+X_n1 = [[3], [5]]
 
-ai.fit(x_train,y_train,epochs=3000)
-
-loss_plot = pd.DataFrame(ai.history.history)
-loss_plot.plot()
+X_n1_1 = Scaler.transform(X_n1)
+ai_brain.predict(X_n1_1)
 
 
-
-err = rmse()
-preds = ai.predict(x_test)
-err(y_test,preds)
-x_n1 = [[30]]
-x_n_n = scaler.transform(x_n1)
-ai.predict(x_n_n)
 
 ```
 ## Dataset Information
 
+![def](https://github.com/user-attachments/assets/ceb858a7-b530-487e-ab11-72da935798ee)
 
-![image](https://github.com/user-attachments/assets/ad78cc6e-7638-4035-95cf-39d2f3698c07)
+
 
 
 ## OUTPUT
 
 ### Training Loss Vs Iteration Plot
 
-![image](https://github.com/user-attachments/assets/1ae7337a-bb6b-470e-85d4-5906731e120e)
+![def2](https://github.com/user-attachments/assets/b4055444-7807-4196-89f1-71d344a72640)
+
 
 
 ### Test Data Root Mean Squared Error
 
+![def3](https://github.com/user-attachments/assets/93c0f269-eecc-4448-bb8c-e70445148e95)
 
-![image](https://github.com/user-attachments/assets/41a6d340-dd55-421f-a37f-2327f0fc7119)
 
 
 ### New Sample Data Prediction
 
+![def4](https://github.com/user-attachments/assets/032290b4-fb56-49ca-a595-5b44c61a38a4)
 
-![image](https://github.com/user-attachments/assets/4f0b07bc-7291-4eb2-b12a-215d0e9f4f85)
+
 
 
 ## RESULT
